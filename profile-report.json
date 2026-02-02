@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-02-02T14:08:02.539Z",
+  "test": "executor-5000-patches",
+  "execution": {
+    "duration_ms": 456.49,
+    "patches": 5000,
+    "throughput_per_sec": 10953,
+    "per_patch_ms": 0.0913
+  },
+  "memory": {
+    "initial": {
+      "heap_used_mb": 4.65,
+      "heap_total_mb": 6.06
+    },
+    "final": {
+      "heap_used_mb": 5.76,
+      "heap_total_mb": 10.31
+    },
+    "delta": {
+      "heap_used_mb": 0.56,
+      "heap_total_mb": 0.5
+    },
+    "per_patch_kb": 0.11
+  },
+  "checks": {
+    "memory_leak": "✅ PASS",
+    "performance": "✅ PASS"
+  }
+}

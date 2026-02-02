@@ -26,6 +26,11 @@ Thumbs.db
 .test-output.json
 .test-results.txt
 
+# Coverage
+coverage/
+.nyc_output/
+*.lcov
+
 # Environment
 .env
 .env.local

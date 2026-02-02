@@ -20,7 +20,10 @@
     "test:05-features": "node tests/05-production/feature-flags.js",
     "test:05-monitoring": "node tests/05-production/monitoring.js",
     "test:05-integration": "node tests/05-production/integration.js",
-    "test:all-phases": "npm run test:00 && npm run test:01 && npm run test:02 && npm run test:03 && npm run test:03-audit && npm run test:04 && npm run test:A && npm run test:B && npm run test:C && npm run test:D && npm run test:05-features && npm run test:05-monitoring && npm run test:05-integration"
+    "test:all-phases": "npm run test:00 && npm run test:01 && npm run test:02 && npm run test:03 && npm run test:03-audit && npm run test:04 && npm run test:A && npm run test:B && npm run test:C && npm run test:D && npm run test:05-features && npm run test:05-monitoring && npm run test:05-integration",
+    "coverage": "nyc npm run test:all-phases",
+    "coverage:report": "nyc report --reporter=html && open coverage/index.html",
+    "profile": "node profile.js"
   },
   "keywords": [
     "batch",
@@ -42,7 +45,8 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "assert": "^2.0.0"
+    "assert": "^2.0.0",
+    "nyc": "^17.1.0"
   },
   "directories": {
     "src": "src",
