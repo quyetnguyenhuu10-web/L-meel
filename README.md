@@ -1,6 +1,6 @@
 # Batch Patch System v1.0.0 - Production Grade
 
-[![Tests](https://github.com/yourusername/lmeel/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/lmeel/actions/workflows/test.yml)
+[![Tests](https://github.com/quyetnguyenhuu10-web/L-meel/actions/workflows/test.yml/badge.svg)](https://github.com/quyetnguyenhuu10-web/L-meel/actions/workflows/test.yml)
 
 A production-grade batch patching system with feature flags, Prometheus monitoring, and gradual rollout strategy. Implements systems engineering principles with linear phases and comprehensive testing.
 
