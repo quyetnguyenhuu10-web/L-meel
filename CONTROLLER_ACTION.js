@@ -30,9 +30,16 @@ async function applyPatchesAction(params, paper) {
   };
 
   try {
-    // Get current paper content
-    const lines = paper.lines || [];
-    let workingLines = [...lines];
+    // ================================================================
+    // SNAPSHOT SSOT (Single Source of Truth)
+    // ================================================================
+    // All patches reference line numbers from this snapshot
+    // Execution state (workingLines) changes as patches apply
+    // Validation must use snapshot length for range checks
+    // ================================================================
+    const snapshotLines = [...(paper.lines || [])];  // Immutable SSOT
+    const snapshotLength = snapshotLines.length;     // Fixed for validation
+    let workingLines = [...snapshotLines];           // Execution state (mutable)
 
     // ================================================================
     // STEP 1: Separate patches by type
@@ -53,18 +60,18 @@ async function applyPatchesAction(params, paper) {
     // STEP 2: Apply write_replace_line patches (DESC order)
     // ================================================================
     for (const patch of replacePatchesDesc) {
-      const lineIdx = patch.lineNumber - 1; // Convert 1-indexed to 0-indexed
+      const lineIdx = patch.lineNumber - 1;
 
-      // Validate line exists
-      if (lineIdx < 0 || lineIdx >= workingLines.length) {
+      // Validate against SNAPSHOT (not execution state)
+      if (lineIdx < 0 || lineIdx >= snapshotLength) {
         result.failedPatches.push({
           patch,
-          error: `Line ${patch.lineNumber} out of range (1-${workingLines.length})`
+          error: `Line ${patch.lineNumber} out of range (1-${snapshotLength})`
         });
         continue;
       }
 
-      // Apply replacement
+      // Apply to EXECUTION STATE (workingLines)
       workingLines[lineIdx] = patch.text;
       result.appliedCount++;
     }
@@ -72,10 +79,14 @@ async function applyPatchesAction(params, paper) {
     // ================================================================
     // STEP 3: Apply insert_line patches (DESC order)
     // ================================================================
+    // ⚠️ WARNING: INSERT patches cannot mix with DELETE/REPLACE
+    // If you need INSERT after other operations, apply in separate batch
     for (const patch of insertPatchesDesc) {
-      const insertIdx = patch.lineNumber; // Insert after this line (0-indexed)
+      const insertIdx = patch.lineNumber;
 
-      // Validate insertion point
+      // ⚠️ RISKY: INSERT validation must account for execution state changes
+      // If DELETE/REPLACE changed line count, this may fail
+      // SAFE approach: Only allow INSERT at snapshot boundaries + applied inserts
       if (insertIdx < 0 || insertIdx > workingLines.length) {
         result.failedPatches.push({
           patch,
@@ -93,9 +104,10 @@ async function applyPatchesAction(params, paper) {
     // STEP 4: Apply delete_line patches (DESC order)
     // ================================================================
     for (const patch of deletePatchesDesc) {
-      const lineIdx = patch.lineNumber - 1; // Convert 1-indexed to 0-indexed
+      const lineIdx = patch.lineNumber - 1;
 
-      // Validate line exists
+      // Validate against CURRENT EXECUTION STATE
+      // (DELETE works on whatever state is now)
       if (lineIdx < 0 || lineIdx >= workingLines.length) {
         result.failedPatches.push({
           patch,
