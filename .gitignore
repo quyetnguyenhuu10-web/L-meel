@@ -1,0 +1,40 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Feature Flags (runtime data)
+.feature-flags.json
+.test-flags-*.json
+
+# Metrics/Monitoring (runtime)
+.metrics.json
+.prometheus-export.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test outputs
+.test-output.json
+.test-results.txt
+
+# Environment
+.env
+.env.local
+
+# Build/dist
+dist/
+build/
+out/
+
+# Logs
+logs/
+*.log
