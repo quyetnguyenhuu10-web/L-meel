@@ -11,7 +11,7 @@
  */
 
 import assert from 'assert';
-import { applyPatchesAction, MockPaper } from './CONTROLLER_ACTION.js';
+import { applyPatchesAction, MockPaper } from '../phases/03-normalization/CONTROLLER_ACTION.js';
 
 console.log('╔════════════════════════════════════════════════════════╗');
 console.log('║      PHASE 03.5: AUDIT TEST SUITE                     ║');

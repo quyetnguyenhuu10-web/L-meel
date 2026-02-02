@@ -15,7 +15,7 @@
  */
 
 import assert from 'assert';
-import { executeApplyPatches } from './EXECUTOR_HANDLER.js';
+import { executeApplyPatches } from '../phases/02-executor/EXECUTOR_HANDLER.js';
 
 console.log('╔════════════════════════════════════════════════════════╗');
 console.log('║      PHASE 02: EXECUTOR HANDLER TEST                  ║');

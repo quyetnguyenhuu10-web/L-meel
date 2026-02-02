@@ -9,10 +9,10 @@
  * - Layer 3: Execution
  */
 
-import assert from 'assert';
-import { PatchSemantics } from './PATCH_SEMANTICS.js';
-import { PatchNormalizer } from './PATCH_NORMALIZER.js';
-import { PatchExecutor } from './PATCH_EXECUTOR.js';
+const assert = require('assert');
+const PatchSemantics = require('../src/core/PATCH_SEMANTICS');
+const PatchNormalizer = require('../src/core/PATCH_NORMALIZER');
+const PatchExecutor = require('../src/core/PATCH_EXECUTOR');
 
 console.log('╔════════════════════════════════════════════════════════╗');
 console.log('║      TEST 3-LAYER ARCHITECTURE                         ║');

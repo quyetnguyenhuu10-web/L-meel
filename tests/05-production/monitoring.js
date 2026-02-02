@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { ProductionMonitor } = require('./MONITORING');
+const { ProductionMonitor } = require('../../src/production/MONITORING');
 
 // ============ Test Suite: Production Monitoring ============
 

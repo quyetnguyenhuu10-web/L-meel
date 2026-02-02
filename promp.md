@@ -49,4 +49,4 @@ QUY ƯỚC OUTPUT:
 - Khi cần chia nhỏ công việc, hãy tự tổ chức thành các file hoặc bước tuần tự.
 
 Hãy duy trì phương pháp này xuyên suốt toàn bộ project.
-Hãy reply tôi bằng Tiếng Việt. Giải thích lại cho tôi bạn đã làm gì? Kết quả ra sao?
+Hãy reply tôi bằng **Tiếng Việt 100%**. Giải thích lại cho tôi bạn đã làm gì? Kết quả ra sao?

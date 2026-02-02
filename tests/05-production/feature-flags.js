@@ -1,7 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { FeatureFlags, createBatchPatchHandler } = require('./FEATURE_FLAGS');
+const { FeatureFlags, createBatchPatchHandler } = require('../../src/production/FEATURE_FLAGS');
 
 // ============ Test Suite: Feature Flags ============
 

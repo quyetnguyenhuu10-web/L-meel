@@ -1,0 +1,53 @@
+{
+  "name": "batch-patch-system",
+  "version": "1.0.0",
+  "description": "Production-grade batch patch system with feature flags, monitoring, and alerting",
+  "main": "src/core/PATCH_EXECUTOR.js",
+  "scripts": {
+    "test": "echo 'See tests/ directory for phase-organized tests'",
+    "test:00": "node tests/00-baseline.js",
+    "test:01": "node tests/01-tools.js",
+    "test:02": "node tests/02-executor.js",
+    "test:03": "node tests/03-normalization.js",
+    "test:03-audit": "node tests/03-normalization-audit.js",
+    "test:04": "node tests/04-integration.js",
+    "test:audit": "npm run test:03-audit",
+    "test:A": "node tests/A-invariants.js",
+    "test:B": "node tests/B-layers.js",
+    "test:C": "node tests/C-observability.js",
+    "test:D": "node tests/D-resilience.js",
+    "test:05": "npm run test:05-features",
+    "test:05-features": "node tests/05-production/feature-flags.js",
+    "test:05-monitoring": "node tests/05-production/monitoring.js",
+    "test:05-integration": "node tests/05-production/integration.js",
+    "test:all-phases": "npm run test:00 && npm run test:01 && npm run test:02 && npm run test:03 && npm run test:03-audit && npm run test:04 && npm run test:A && npm run test:B && npm run test:C && npm run test:D && npm run test:05-features && npm run test:05-monitoring && npm run test:05-integration"
+  },
+  "keywords": [
+    "batch",
+    "patches",
+    "production",
+    "feature-flags",
+    "monitoring",
+    "alerting",
+    "gradual-rollout",
+    "systems-engineering"
+  ],
+  "author": "AI Engineering Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourorg/batch-patch-system"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "assert": "^2.0.0"
+  },
+  "directories": {
+    "src": "src",
+    "test": "tests",
+    "doc": "docs",
+    "phases": "phases"
+  }
+}

@@ -1,8 +1,8 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { FeatureFlags, createBatchPatchHandler } = require('./FEATURE_FLAGS');
-const { ProductionMonitor } = require('./MONITORING');
+const { FeatureFlags, createBatchPatchHandler } = require('../../src/production/FEATURE_FLAGS');
+const { ProductionMonitor } = require('../../src/production/MONITORING');
 
 // ============ Test Suite: Phase 05 Full Integration ============
 

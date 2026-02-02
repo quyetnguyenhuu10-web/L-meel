@@ -13,7 +13,7 @@
  */
 
 import assert from 'assert';
-import TOOLS from './TOOLS_ARRAY.js';
+import TOOLS from '../phases/00-baseline/TOOLS_ARRAY.js';
 
 console.log('╔════════════════════════════════════════════════════════╗');
 console.log('║        PHASE 01: TOOL SCHEMA TEST                     ║');

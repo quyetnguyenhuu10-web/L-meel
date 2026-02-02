@@ -18,7 +18,7 @@ import {
   enforceIndependentPatches,
   enforceRevisionIncrement,
   enforceFixedSnapshotSize
-} from './INVARIANT_ENFORCER.js';
+} from '../src/core/INVARIANT_ENFORCER.js';
 
 console.log('╔════════════════════════════════════════════════════════╗');
 console.log('║       TEST INVARIANTS - 7 Core System Laws             ║');

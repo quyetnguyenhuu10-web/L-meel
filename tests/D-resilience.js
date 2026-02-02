@@ -11,11 +11,11 @@
  */
 
 const assert = require('assert');
-const Logger = require('./LOGGER');
-const Metrics = require('./METRICS');
-const PatchSemantics = require('./PATCH_SEMANTICS');
-const PatchNormalizer = require('./PATCH_NORMALIZER');
-const PatchExecutor = require('./PATCH_EXECUTOR');
+const Logger = require('../src/observability/LOGGER');
+const Metrics = require('../src/observability/METRICS');
+const PatchSemantics = require('../src/core/PATCH_SEMANTICS');
+const PatchNormalizer = require('../src/core/PATCH_NORMALIZER');
+const PatchExecutor = require('../src/core/PATCH_EXECUTOR');
 
 // ============================================================
 // TEST 1: STRESS - 1000 patches độc lập
