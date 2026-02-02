@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run all tests
+        run: npm run test:all-phases
+      
+      - name: Test Phase 00 - Baseline
+        run: npm run test:00
+      
+      - name: Test Phase 01 - Tools
+        run: npm run test:01
+      
+      - name: Test Phase 02 - Executor
+        run: npm run test:02
+      
+      - name: Test Phase 03 - Normalization
+        run: npm run test:03
+      
+      - name: Test Phase 04 - Integration
+        run: npm run test:04
+      
+      - name: Test Phase A - Invariants
+        run: npm run test:A
+      
+      - name: Test Phase B - Layers
+        run: npm run test:B
+      
+      - name: Test Phase C - Observability
+        run: npm run test:C
+      
+      - name: Test Phase D - Resilience
+        run: npm run test:D
+      
+      - name: Test Phase 05.1 - Feature Flags
+        run: npm run test:05-features
+      
+      - name: Test Phase 05.2 - Monitoring
+        run: npm run test:05-monitoring
+      
+      - name: Test Phase 05.5 - Integration
+        run: npm run test:05-integration
