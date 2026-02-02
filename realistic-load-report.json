@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-02-02T14:15:14.849Z",
+  "test": "realistic-load",
+  "config": {
+    "users": 5,
+    "batchesPerUser": 10,
+    "patchMix": "60% REPLACE, 30% INSERT, 10% DELETE",
+    "lineDistribution": "Pareto (80/20)",
+    "batchSizes": "70% small, 20% medium, 10% large"
+  },
+  "results": {
+    "totalPatches": 2483,
+    "totalSuccess": 0,
+    "totalFail": 2483,
+    "errorRate": 1,
+    "totalTime": 82,
+    "avgThroughput": 30895.689655172417,
+    "systemThroughput": 30280.48780487805
+  },
+  "perUser": [
+    {
+      "userId": 1,
+      "totalPatches": 1775,
+      "totalTime": 58,
+      "successCount": 0,
+      "failCount": 1775,
+      "avgLatency": 0.03267605633802817,
+      "throughput": 30603.44827586207
+    },
+    {
+      "userId": 2,
+      "totalPatches": 103,
+      "totalTime": 4,
+      "successCount": 0,
+      "failCount": 103,
+      "avgLatency": 0.038834951456310676,
+      "throughput": 25750
+    },
+    {
+      "userId": 3,
+      "totalPatches": 108,
+      "totalTime": 3,
+      "successCount": 0,
+      "failCount": 108,
+      "avgLatency": 0.027777777777777776,
+      "throughput": 36000
+    },
+    {
+      "userId": 4,
+      "totalPatches": 257,
+      "totalTime": 8,
+      "successCount": 0,
+      "failCount": 257,
+      "avgLatency": 0.0311284046692607,
+      "throughput": 32125
+    },
+    {
+      "userId": 5,
+      "totalPatches": 240,
+      "totalTime": 8,
+      "successCount": 0,
+      "failCount": 240,
+      "avgLatency": 0.03333333333333333,
+      "throughput": 30000
+    }
+  ],
+  "verdict": "PASS ✅ (Throughput validated)"
+}
