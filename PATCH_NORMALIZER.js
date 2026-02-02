@@ -9,7 +9,7 @@
  * This layer prepares patches for execution.
  */
 
-import {
+const {
   InvariantViolation,
   enforceSnapshotSSoT,
   enforceDescOrder,
@@ -17,8 +17,8 @@ import {
   enforceInsertBounds,
   enforceIndependentPatches,
   enforceFixedSnapshotSize
-} from './INVARIANT_ENFORCER.js';
-import { PatchSemantics } from './PATCH_SEMANTICS.js';
+} = require('./INVARIANT_ENFORCER.js');
+const PatchSemantics = require('./PATCH_SEMANTICS.js');
 
 // ============================================================
 // PATCH NORMALIZATION
@@ -30,24 +30,70 @@ class PatchNormalizer {
    * 
    * @param {Array} snapshotLines - Immutable snapshot
    * @param {Array} patches - Raw patches
+   * @param {Object} observability - Logger and metrics { logger, metrics, batchId }
    * @returns {Object} Normalized { semantics, organized, warnings }
    */
-  static normalize(snapshotLines, patches) {
+  static normalize(snapshotLines, patches, observability = {}) {
+    const logger = observability.logger;
+    const metrics = observability.metrics;
+    const batchId = observability.batchId || 'unknown';
+    
+    const timerNormalizer = metrics?.startTimer?.();
+    
+    if (logger) {
+      logger.info({
+        layer: 'NORMALIZER',
+        batchId,
+        patchCount: patches.length
+      }, 'Normalizing patches');
+    }
+    
     // Step 1: Freeze snapshot (immutability)
     const frozen = Object.freeze([...snapshotLines]);
     const snapshotLength = frozen.length;
 
     // Step 2: Analyze semantics
-    const semantics = new PatchSemantics(frozen, patches);
+    const semantics = new PatchSemantics(frozen, patches, observability);
 
     // Step 3: Enforce invariants
     try {
+      if (logger) {
+        logger.debug({
+          layer: 'NORMALIZER',
+          batchId,
+          step: 'enforcing_snapshot_ssot'
+        }, 'Validating snapshot SSOT');
+      }
       enforceSnapshotSSoT(patches, snapshotLength);
+      
+      if (logger) {
+        logger.debug({
+          layer: 'NORMALIZER',
+          batchId,
+          step: 'enforcing_immutable_snapshot'
+        }, 'Validating immutability');
+      }
       enforceImmutableSnapshot(frozen);
+      
+      if (logger) {
+        logger.debug({
+          layer: 'NORMALIZER',
+          batchId,
+          step: 'enforcing_insert_bounds'
+        }, 'Validating INSERT bounds');
+      }
       enforceInsertBounds(
         semantics.byType.insert_line,
         snapshotLength
       );
+      
+      if (logger) {
+        logger.debug({
+          layer: 'NORMALIZER',
+          batchId,
+          step: 'enforcing_independent'
+        }, 'Checking patch independence');
+      }
       enforceIndependentPatches(patches, snapshotLength);
       // DESC order will be validated before execution
     } catch (error) {
@@ -63,6 +109,16 @@ class PatchNormalizer {
       insertDesc: this.sortDesc(semantics.byType.insert_line),
       deleteDesc: this.sortDesc(semantics.byType.delete_line)
     };
+
+    if (logger) {
+      logger.debug({
+        layer: 'NORMALIZER',
+        batchId,
+        replaceOrder: organized.replaceDesc.map(p => p.lineNumber),
+        insertOrder: organized.insertDesc.map(p => p.lineNumber),
+        deleteOrder: organized.deleteDesc.map(p => p.lineNumber)
+      }, 'Patches organized and sorted DESC');
+    }
 
     // Step 5: Validate DESC order
     try {
@@ -80,13 +136,42 @@ class PatchNormalizer {
     // Step 6: Generate warnings (non-blocking)
     const warnings = this.generateWarnings(semantics, patches);
 
+    if (logger) {
+      warnings.forEach(w => {
+        logger.warn({
+          layer: 'NORMALIZER',
+          batchId,
+          warning: w
+        }, `Non-blocking warning`);
+      });
+    }
+
+    const durationNormalizer = timerNormalizer ? metrics?.endTimer?.('normalizer', timerNormalizer, { batchId }) : null;
+
+    if (logger) {
+      logger.info({
+        layer: 'NORMALIZER',
+        batchId,
+        warningCount: warnings.length,
+        durationMs: durationNormalizer?.toFixed(2)
+      }, 'Normalization complete');
+    }
+
+    if (metrics) {
+      metrics.increment('normalized', 1, { batchId });
+      metrics.setGauge('patch_count', patches.length, { batchId });
+    }
+
     return {
       snapshotLines: frozen,
       snapshotLength,
       semantics,
       organized,
       warnings,
-      isReady: true
+      isReady: true,
+      logger,
+      metrics,
+      batchId
     };
   }
 
@@ -139,4 +224,4 @@ class PatchNormalizer {
   }
 }
 
-export { PatchNormalizer };
+module.exports = PatchNormalizer;

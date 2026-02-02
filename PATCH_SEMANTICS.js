@@ -20,8 +20,24 @@ class PatchSemantics {
    * 
    * @param {Array} snapshotLines - Initial immutable snapshot
    * @param {Array} patches - Array of patch objects
+   * @param {Object} observability - Logger and metrics { logger, metrics, batchId }
    */
-  constructor(snapshotLines, patches) {
+  constructor(snapshotLines, patches, observability = {}) {
+    this.logger = observability.logger;
+    this.metrics = observability.metrics;
+    this.batchId = observability.batchId || 'unknown';
+    
+    const timerSemantics = this.metrics?.startTimer?.();
+    
+    if (this.logger) {
+      this.logger.info({
+        layer: 'SEMANTICS',
+        batchId: this.batchId,
+        snapshotLength: snapshotLines.length,
+        patchCount: patches.length
+      }, 'Analyzing patch semantics');
+    }
+    
     this.snapshotLines = Object.freeze([...snapshotLines]);
     this.snapshotLength = this.snapshotLines.length;
     this.patches = patches;
@@ -30,6 +46,33 @@ class PatchSemantics {
     this.byType = this.categorizeByType();
     this.byLine = this.categorizeByLine();
     this.summary = this.analyzeSummary();
+    
+    const durationSemantics = timerSemantics ? this.metrics?.endTimer?.('semantics', timerSemantics, { batchId: this.batchId }) : null;
+    
+    if (this.logger) {
+      this.logger.info({
+        layer: 'SEMANTICS',
+        batchId: this.batchId,
+        totalPatches: this.summary.totalPatches,
+        replaceCount: this.summary.replaceCount,
+        insertCount: this.summary.insertCount,
+        deleteCount: this.summary.deleteCount,
+        expectedFinalLength: this.summary.expectedFinalLength,
+        independent: this.areIndependent(),
+        durationMs: durationSemantics?.toFixed(2)
+      }, 'Semantics analysis complete');
+    }
+    
+    if (this.logger && !this.areIndependent()) {
+      this.logger.warn({
+        layer: 'SEMANTICS',
+        batchId: this.batchId
+      }, 'Semantic coupling detected: patches may reference same lines');
+    }
+    
+    if (this.metrics) {
+      this.metrics.increment('semantics_analyzed', 1, { batchId: this.batchId });
+    }
   }
 
   /**
@@ -149,4 +192,4 @@ PatchSemantics:
   }
 }
 
-export { PatchSemantics };
+module.exports = PatchSemantics;

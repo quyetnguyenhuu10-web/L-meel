@@ -10,7 +10,7 @@
  * This layer assumes patches are already validated.
  */
 
-import { InvariantViolation, enforceRevisionIncrement, enforceFixedSnapshotSize } from './INVARIANT_ENFORCER.js';
+const { InvariantViolation, enforceRevisionIncrement, enforceFixedSnapshotSize } = require('./INVARIANT_ENFORCER.js');
 
 // ============================================================
 // PATCH EXECUTOR
@@ -23,9 +23,27 @@ class PatchExecutor {
    * @param {Array} snapshotLines - Immutable snapshot
    * @param {Object} normalized - From PatchNormalizer.normalize()
    * @param {Object} paper - Paper object with lines + rev
+   * @param {Object} observability - Logger and metrics (from normalized)
    * @returns {Object} Execution result
    */
-  static execute(snapshotLines, normalized, paper) {
+  static execute(snapshotLines, normalized, paper, observability = {}) {
+    const logger = observability.logger || normalized?.logger;
+    const metrics = observability.metrics || normalized?.metrics;
+    const batchId = observability.batchId || normalized?.batchId || 'unknown';
+    
+    const timerExecutor = metrics?.startTimer?.();
+    
+    if (logger) {
+      logger.info({
+        layer: 'EXECUTOR',
+        batchId,
+        snapshotLength: snapshotLines.length,
+        replaceCount: normalized.organized.replaceDesc.length,
+        insertCount: normalized.organized.insertDesc.length,
+        deleteCount: normalized.organized.deleteDesc.length
+      }, 'Starting patch execution');
+    }
+
     const result = {
       success: true,
       appliedCount: 0,
@@ -43,14 +61,33 @@ class PatchExecutor {
       let workingLines = [...snapshotLines];
 
       // ===== PHASE 1: Apply REPLACE patches =====
+      if (logger) {
+        logger.debug({
+          layer: 'EXECUTOR',
+          batchId,
+          phase: 'REPLACE',
+          order: normalized.organized.replaceDesc.map(p => p.lineNumber)
+        }, 'Applying REPLACE patches');
+      }
+      
       for (const patch of normalized.organized.replaceDesc) {
         const lineIdx = patch.lineNumber - 1;
 
         // Bounds check against snapshot
         if (lineIdx < 0 || lineIdx >= snapshotLength) {
+          const errorMsg = `Line ${patch.lineNumber} out of snapshot bounds`;
+          if (logger) {
+            logger.error({
+              layer: 'EXECUTOR',
+              batchId,
+              patchIndex: normalized.organized.replaceDesc.indexOf(patch),
+              lineNumber: patch.lineNumber,
+              error: errorMsg
+            }, 'Patch failed');
+          }
           result.failedPatches.push({
             patch,
-            error: `Line ${patch.lineNumber} out of snapshot bounds`
+            error: errorMsg
           });
           continue;
         }
@@ -61,6 +98,15 @@ class PatchExecutor {
       }
 
       // ===== PHASE 2: Apply INSERT patches =====
+      if (logger) {
+        logger.debug({
+          layer: 'EXECUTOR',
+          batchId,
+          phase: 'INSERT',
+          order: normalized.organized.insertDesc.map(p => p.lineNumber)
+        }, 'Applying INSERT patches');
+      }
+      
       for (const patch of normalized.organized.insertDesc) {
         const insertIdx = patch.lineNumber;
 
@@ -79,6 +125,15 @@ class PatchExecutor {
       }
 
       // ===== PHASE 3: Apply DELETE patches =====
+      if (logger) {
+        logger.debug({
+          layer: 'EXECUTOR',
+          batchId,
+          phase: 'DELETE',
+          order: normalized.organized.deleteDesc.map(p => p.lineNumber)
+        }, 'Applying DELETE patches');
+      }
+      
       for (const patch of normalized.organized.deleteDesc) {
         const lineIdx = patch.lineNumber - 1;
 
@@ -117,9 +172,47 @@ class PatchExecutor {
       // Success determination
       result.success = result.failedPatches.length === 0;
 
+      const durationExecutor = timerExecutor ? metrics?.endTimer?.('executor', timerExecutor, { batchId }) : null;
+
+      if (logger) {
+        logger.info({
+          layer: 'EXECUTOR',
+          batchId,
+          appliedCount: result.appliedCount,
+          failedCount: result.failedPatches.length,
+          beforeRev: revisionBefore,
+          afterRev: paper.rev,
+          finalLineCount: workingLines.length,
+          durationMs: durationExecutor?.toFixed(2)
+        }, 'Execution complete');
+      }
+
+      if (metrics) {
+        metrics.increment('patches_applied', result.appliedCount, { batchId });
+        metrics.increment('patches_failed', result.failedPatches.length, { batchId });
+        metrics.increment('batches_completed', result.success ? 1 : 0, { batchId });
+      }
+
       return result;
 
     } catch (error) {
+      if (logger) {
+        logger.error({
+          layer: 'EXECUTOR',
+          batchId,
+          appliedCount: result.appliedCount,
+          failedCount: result.failedPatches.length,
+          errorMessage: error.message
+        }, 'Execution failed');
+      }
+
+      if (metrics) {
+        metrics.increment('batches_failed', 1, { batchId });
+        if (error.severity === 'CRITICAL') {
+          metrics.increment('invariant_violations', 1, { batchId });
+        }
+      }
+
       return {
         success: false,
         appliedCount: result.appliedCount,
@@ -146,4 +239,4 @@ class PatchExecutor {
   }
 }
 
-export { PatchExecutor };
+module.exports = PatchExecutor;
